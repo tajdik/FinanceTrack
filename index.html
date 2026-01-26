@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Karigor - Custom 3D Printing & Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ========================
+           RESET & VARIABLES
+           ======================== */
+        :root {
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --bg-dark: #0a0a12;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-main: #ffffff;
+            --text-muted: #a0a0b0;
+            --gradient-main: linear-gradient(135deg, var(--primary), var(--secondary));
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        img { max-width: 100%; display: block; }
+
+        /* ========================
+           UTILITIES & COMPONENTS
+           ======================== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 242, 255, 0.1);
+            color: white;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        /* ========================
+           HEADER & NAV
+           ======================== */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(10, 10, 18, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: var(--glass-border);
+            padding: 1rem 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span { color: var(--primary); }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .mobile-menu-btn { display: none; font-size: 1.5rem; cursor: pointer; }
+
+        /* ========================
+           HERO SECTION
+           ======================== */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(112, 0, 255, 0.15) 0%, rgba(10, 10, 18, 0) 70%);
+            overflow: hidden;
+        }
+
+        /* Animated Background Elements */
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: float 10s infinite ease-in-out;
+        }
+        .shape-1 { width: 300px; height: 300px; background: var(--primary); top: -50px; left: -50px; }
+        .shape-2 { width: 400px; height: 400px; background: var(--secondary); bottom: -100px; right: -100px; animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 30px); }
+        }
+
+        .hero-content h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .hero-content p {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            animation: slideUp 0.8s ease-out 0.2s backwards;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            animation: slideUp 0.8s ease-out 0.4s backwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========================
+           SERVICES SECTION
+           ======================== */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card {
+            text-align: center;
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .service-card h3 { margin-bottom: 1rem; color: white; }
+        .service-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* ========================
+           GALLERY SECTION
+           ======================== */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .model-card {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .model-img {
+            width: 100%;
+            height: 200px;
+            background: #1a1a24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-family: 'Orbitron', sans-serif;
+            border-bottom: var(--glass-border);
+        }
+        
+        .model-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .model-info { padding: 1.5rem; }
+        
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .model-title { font-size: 1.1rem; font-weight: 600; }
+        .model-price { color: var(--primary); font-weight: 700; font-family: 'Orbitron', sans-serif; }
+        
+        .model-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* ========================
+           CALCULATOR SECTION
+           ======================== */
+        .calculator-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .calc-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: var(--glass-border);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        .calc-result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 242, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .total-price {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* ========================
+           HOW IT WORKS
+           ======================== */
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            counter-reset: step;
+        }
+
+        .step-item {
+            flex: 1;
+            min-width: 200px;
+            max-width: 250px;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 auto 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========================
+           ORDER SECTION
+           ======================== */
+        .order-form-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .order-actions button {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* ========================
+           FOOTER
+           ======================== */
+        footer {
+            background: #050508;
+            padding: 60px 0 20px;
+            border-top: var(--glass-border);
+            margin-top: 80px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h4 {
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-col a {
+            color: var(--text-muted);
+        }
+        
+        .footer-col a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ========================
+           RESPONSIVE
+           ======================== */
+        @media (max-width: 768px) {
+            .hero-content h1 { font-size: 2.5rem; }
+            .nav-links { display: none; } /* Simplified for single file no-js-toggle menu complexity */
+            .mobile-menu-btn { display: block; }
+            .order-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <span>3D</span> KARIGOR
+                </div>
+                <div class="nav-links">
+                    <a href="#services">Services</a>
+                    <a href="#gallery">Gallery</a>
+                    <a href="#calculator">Calculator</a>
+                    <a href="#order">Order</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="bg-shape shape-1"></div>
+        <div class="bg-shape shape-2"></div>
+        
+        <div class="container hero-content">
+            <h1>Turn Ideas Into<br><span style="color: var(--primary)">Reality</span></h1>
+            <p>Affordable 3D Printing & Custom Design Service in Bangladesh</p>
+            <div class="hero-buttons">
+                <a href="#gallery" class="btn btn-primary">Browse Models</a>
+                <a href="#order" class="btn btn-outline">Order Custom</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="section">
+        <div class="container">
+            <h2 class="section-title">Our Services</h2>
+            <div class="services-grid">
+                <div class="glass-card service-card">
+                    <div class="service-icon">🖨️</div>
+                    <h3>3D Printing</h3>
+                    <p>High-quality FDM and SLA printing for prototypes, parts, and artistic models.</p>
+                </div>
+                <div class="glass-card service-card">
+                    <div class="service-icon">✏️</div>
+                    <h3>Custom Design</h3>
+                    <p>Professional CAD modeling services to bring your sketches to 3D life.</p>
+                </div>
+                <div class="glass-card service-card">
+                    <div class="service-icon">⚙️</div>
+                    <h3>Rapid Prototyping</h3>
+                    <p>Fast turnaround for engineering and product development iterations.</p>
+                </div>
+                <div class="glass-card service-card">
+                    <div class="service-icon">📦</div>
+                    <h3>Bulk Orders</h3>
+                    <p>Discounted rates for batch production and corporate gifts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GALLERY -->
+    <section id="gallery" class="section">
+        <div class="container">
+            <h2 class="section-title">Model Gallery</h2>
+            <div class="gallery-grid">
+                <!-- Card 1 -->
+                <div class="glass-card model-card">
+                    <div class="model-img">
+                        <img src="https://placehold.co/400x300/1a1a24/FFF?text=Articulated+Dragon" alt="Dragon Model">
+                    </div>
+                    <div class="model-info">
+                        <div class="model-header">
+                            <div class="model-title">Articulated Dragon</div>
+                            <div class="model-price">৳1200</div>
+                        </div>
+                        <div class="model-meta">
+                            <span class="badge">PLA+</span>
+                            <span class="badge">20cm</span>
+                        </div>
+                        <button class="btn btn-outline" style="width: 100%; font-size: 0.8rem;" onclick="prefillOrder('Articulated Dragon')">Order This</button>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card model-card">
+                    <div class="model-img">
+                         <img src="https://placehold.co/400x300/1a1a24/FFF?text=Phone+Stand" alt="Phone Stand">
+                    </div>
+                    <div class="model-info">
+                        <div class="model-header">
+                            <div class="model-title">Mech Phone Stand</div>
+                            <div class="model-price">৳450</div>
+                        </div>
+                        <div class="model-meta">
+                            <span class="badge">PETG</span>
+                            <span class="badge">Adjustable</span>
+                        </div>
+                        <button class="btn btn-outline" style="width: 100%; font-size: 0.8rem;" onclick="prefillOrder('Mech Phone Stand')">Order This</button>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card model-card">
+                    <div class="model-img">
+                         <img src="https://placehold.co/400x300/1a1a24/FFF?text=Lithophane" alt="Lithophane">
+                    </div>
+                    <div class="model-info">
+                        <div class="model-header">
+                            <div class="model-title">Custom Lithophane</div>
+                            <div class="model-price">৳800</div>
+                        </div>
+                        <div class="model-meta">
+                            <span class="badge">White PLA</span>
+                            <span class="badge">Photo</span>
+                        </div>
+                        <button class="btn btn-outline" style="width: 100%; font-size: 0.8rem;" onclick="prefillOrder('Custom Lithophane')">Order This</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CALCULATOR -->
+    <section id="calculator" class="section">
+        <div class="container">
+            <h2 class="section-title">Price Estimator</h2>
+            <div class="glass-card calculator-container">
+                <div class="calc-form">
+                    <div class="form-group">
+                        <label>Material Type</label>
+                        <select id="calc-material" class="form-control" onchange="calculatePrice()">
+                            <option value="15">PLA (Standard) - ৳15/g</option>
+                            <option value="20">PLA+ (Stronger) - ৳20/g</option>
+                            <option value="25">PETG (Durable) - ৳25/g</option>
+                            <option value="35">TPU (Flexible) - ৳35/g</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Weight (grams)</label>
+                        <input type="number" id="calc-weight" class="form-control" placeholder="e.g. 50" oninput="calculatePrice()">
+                    </div>
+                    <div class="form-group">
+                        <label>Print Quality</label>
+                        <select id="calc-quality" class="form-control" onchange="calculatePrice()">
+                            <option value="1">Standard (0.2mm)</option>
+                            <option value="1.3">High Detail (0.12mm)</option>
+                            <option value="0.8">Draft (0.28mm)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="calc-result">
+                        <div style="margin-bottom: 10px; color: var(--text-muted);">Estimated Price</div>
+                        <div class="total-price">৳<span id="calc-total">0</span></div>
+                        <div style="font-size: 0.8rem; margin-top: 10px; opacity: 0.7;">*Final price may vary based on complexity and support material.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section" style="background: rgba(255,255,255,0.02);">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h3>Send File</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px;">Upload your STL file or describe your idea for custom design.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h3>Get Quote</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px;">We analyze the model and send you a precise price & time estimate.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h3>Print</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px;">Once confirmed, we start printing with high-quality materials.</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">4</div>
+                    <h3>Delivery</h3>
+                    <p style="color: var(--text-muted); margin-top: 10px;">Receive your 3D printed model via courier anywhere in Bangladesh.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ORDER -->
+    <section id="order" class="section">
+        <div class="container">
+            <h2 class="section-title">Place Order</h2>
+            <div class="glass-card order-form-container">
+                <div class="calc-form">
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" id="order-name" class="form-control" placeholder="Enter your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="order-phone" class="form-control" placeholder="017XXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Model Name / Description</label>
+                        <input type="text" id="order-model" class="form-control" placeholder="e.g. Articulated Dragon or Custom Part">
+                    </div>
+                    <div class="form-group">
+                        <label>Material Preference</label>
+                        <select id="order-material" class="form-control">
+                            <option value="PLA">PLA</option>
+                            <option value="PETG">PETG</option>
+                            <option value="Resin">Resin (SLA)</option>
+                            <option value="Not Sure">Not Sure (Recommend me)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="order-qty" class="form-control" value="1" min="1">
+                    </div>
+                    
+                    <div class="order-actions">
+                        <button class="btn btn-primary" onclick="submitOrder('whatsapp')">
+                            <span>📱 Order via WhatsApp</span>
+                        </button>
+                        <button class="btn btn-outline" onclick="submitOrder('email')">
+                            <span>📧 Order via Email</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT & FOOTER -->
+    <section id="contact">
+        <footer>
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-col">
+                        <div class="logo" style="margin-bottom: 20px;">
+                            <span>3D</span> KARIGOR
+                        </div>
+                        <p style="color: var(--text-muted);">Bringing your imagination to life, layer by layer.</p>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Contact Us</h4>
+                        <ul>
+                            <li>📍 Dhaka, Bangladesh</li>
+                            <li>📞 +880 1234 567890</li>
+                            <li>📧 hello@3dkarigor.com</li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Links</h4>
+                        <ul>
+                            <li><a href="#services">Services</a></li>
+                            <li><a href="#gallery">Gallery</a></li>
+                            <li><a href="#calculator">Price Calculator</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="copyright">
+                    &copy; 2024 3D Karigor. All rights reserved.
+                </div>
+            </div>
+        </footer>
+    </section>
+
+    <!-- SCRIPTS -->
+    <script>
+        // --- Calculator Logic ---
+        function calculatePrice() {
+            const materialPrice = parseFloat(document.getElementById('calc-material').value) || 0;
+            const weight = parseFloat(document.getElementById('calc-weight').value) || 0;
+            const qualityMultiplier = parseFloat(document.getElementById('calc-quality').value) || 1;
+            
+            // Base calculation: (Material Cost * Weight) * Quality Multiplier + Fixed Handling Fee (50)
+            let total = 0;
+            if (weight > 0) {
+                total = (materialPrice * weight * qualityMultiplier) + 50; 
+            }
+            
+            document.getElementById('calc-total').innerText = Math.round(total);
+        }
+
+        // --- Order Form Logic ---
+        function prefillOrder(modelName) {
+            document.getElementById('order-model').value = modelName;
+            document.getElementById('order').scrollIntoView();
+        }
+
+        function submitOrder(method) {
+            const name = document.getElementById('order-name').value;
+            const phone = document.getElementById('order-phone').value;
+            const model = document.getElementById('order-model').value;
+            const material = document.getElementById('order-material').value;
+            const qty = document.getElementById('order-qty').value;
+
+            if (!name || !phone || !model) {
+                alert('Please fill in Name, Phone, and Model details.');
+                return;
+            }
+
+            const message = `*New Order Request*\n\n` +
+                            `👤 Name: ${name}\n` +
+                            `📞 Phone: ${phone}\n` +
+                            `🛠 Model: ${model}\n` +
+                            `🧱 Material: ${material}\n` +
+                            `🔢 Quantity: ${qty}\n\n` +
+                            `Sent from 3D Karigor Website`;
+
+            if (method === 'whatsapp') {
+                // Replace with actual business number
+                const phoneNumber = "8801234567890"; 
+                const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(url, '_blank');
+            } else if (method === 'email') {
+                const email = "hello@3dkarigor.com";
+                const subject = `Order Request: ${model}`;
+                const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+                window.open(url, '_self');
+            }
+        }
+    </script>
+</body>
+</html>
